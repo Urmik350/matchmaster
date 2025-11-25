@@ -1,0 +1,116 @@
+* {
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0b1020;
+  color: #f5f5f5;
+}
+
+header {
+  padding: 1rem 1.5rem;
+  background: #11182b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #242b45;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+main {
+  padding: 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card {
+  background: #11182b;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #242b45;
+}
+
+input, select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #3a4465;
+  background: #0b1020;
+  color: #f5f5f5;
+  margin: 0.25rem 0;
+}
+
+button {
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  background: #1f2937;
+}
+
+.tabs button.active {
+  background: #3b82f6;
+}
+
+.hidden {
+  display: none;
+}
+
+.inline {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+li {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #242b45;
+}
+
+.error {
+  color: #f97373;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.4rem 0.3rem;
+  border-bottom: 1px solid #242b45;
+  text-align: left;
+}

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Match Master</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Matchmaster</h1>
+    <div id="user-info"></div>
+  </header>
+
+  <main>
+    <!-- Login / signup -->
+    <section id="auth-section">
+      <h2>Join the game</h2>
+      <input id="username-input" placeholder="Username" />
+      <input id="pin-input" placeholder="PIN (optional)" type="password" />
+      <button id="login-btn">Enter</button>
+      <p id="auth-error" class="error"></p>
+    </section>
+
+    <!-- Main app -->
+    <section id="app-section" class="hidden">
+      <nav class="tabs">
+        <button data-tab="admin-tab">Admin</button>
+        <button data-tab="predict-tab">Predict</button>
+        <button data-tab="leaderboard-tab">Leaderboard</button>
+      </nav>
+
+      <!-- Admin tab -->
+      <div id="admin-tab" class="tab hidden">
+        <h2>Admin – Weeks & Matches</h2>
+
+        <div class="card">
+          <h3>Create week</h3>
+          <input id="week-name-input" placeholder="Week name (e.g. Week 1)" />
+          <select id="competition-select">
+            <option value="PL">Premier League</option>
+            <option value="PD">La Liga</option>
+            <option value="CL">Champions League</option>
+            <!-- You can add more competition codes later -->
+          </select>
+          <button id="create-week-btn">Create Week</button>
+          <p class="hint">Only one active week at a time is easiest to start with.</p>
+        </div>
+
+        <div class="card">
+          <h3>Current week</h3>
+          <p id="current-week-label">No week yet</p>
+          <button id="advance-status-btn">Advance status</button>
+          <p class="hint">Status cycles: voting → predicting → locked → finished</p>
+        </div>
+
+        <div class="card">
+          <h3>Import fixtures for this week</h3>
+          <p class="hint">Gets upcoming games from the selected competition for a date range.</p>
+          <div class="inline">
+            <input id="from-date-input" type="date" />
+            <input id="to-date-input" type="date" />
+            <button id="import-fixtures-btn">Import fixtures</button>
+          </div>
+          <p id="import-status"></p>
+        </div>
+
+        <div class="card">
+          <h3>Matches for this week</h3>
+          <p class="hint">During voting, players vote which games to include.</p>
+          <ul id="admin-matches-list"></ul>
+        </div>
+
+        <div class="card">
+          <h3>Update results & calculate scores</h3>
+          <p class="hint">Fetch latest scores from the API and re-calc leaderboard.</p>
+          <button id="refresh-results-btn">Refresh from API</button>
+          <button id="calculate-scores-btn">Calculate & Update Leaderboard</button>
+          <p id="calc-status"></p>
+        </div>
+      </div>
+
+      <!-- Predict tab -->
+      <div id="predict-tab" class="tab hidden">
+        <h2>Make your predictions</h2>
+        <p id="week-status-label"></p>
+        <p class="hint">
+          Each score combo can only be used by one person per match.
+          You can predict until kickoff.
+        </p>
+        <ul id="predict-matches-list"></ul>
+      </div>
+
+      <!-- Leaderboard tab -->
+      <div id="leaderboard-tab" class="tab hidden">
+        <h2>Leaderboard</h2>
+        <table id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Player</th>
+              <th>This week</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
