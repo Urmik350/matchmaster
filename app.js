@@ -377,24 +377,33 @@ function renderUserInfo() {
 function renderAdminMatches(matches) {
   const ul = qs("#admin-matches-list");
   ul.innerHTML = "";
+
   matches.forEach(m => {
     const li = document.createElement("li");
     const votes = m.votes || {};
     const yesVotes = Object.values(votes).filter(v => v === true).length;
     const noVotes = Object.values(votes).filter(v => v === false).length;
 
-    li.innerHTML = `
-      <strong>${m.homeTeam} vs ${m.awayTeam}</strong>
-      <br/>
-      Kickoff: ${m.kickoff.toDate ? m.kickoff.toDate().toLocaleString() : ""}
-      <br/>
-      Votes: ✅ ${yesVotes} | ❌ ${noVotes}
-      <br/>
+    const info = document.createElement("div");
+    info.innerHTML = `
+      <strong>${m.homeTeam} vs ${m.awayTeam}</strong><br/>
+      Kickoff: ${m.kickoff.toDate ? m.kickoff.toDate().toLocaleString() : ""}<br/>
+      Votes: ✅ ${yesVotes} | ❌ ${noVotes}<br/>
       Included: ${m.selected ? "Yes" : "No"}
     `;
+
+    const includeBtn = document.createElement("button");
+    includeBtn.textContent = m.selected ? "Exclude from week" : "Include in week";
+    includeBtn.addEventListener("click", () => {
+      setMatchSelected(m.id, !m.selected);
+    });
+
+    li.appendChild(info);
+    li.appendChild(includeBtn);
     ul.appendChild(li);
   });
 }
+
 
 function renderPredictMatches(matches) {
   const ul = qs("#predict-matches-list");
@@ -402,60 +411,98 @@ function renderPredictMatches(matches) {
 
   if (!currentUser || !currentWeek) return;
 
-  matches.filter(m => m.selected).forEach(m => {
-    const li = document.createElement("li");
-    const label = document.createElement("div");
-    label.innerHTML = `<strong>${m.homeTeam} vs ${m.awayTeam}</strong><br/>Kickoff: ${m.kickoff.toDate ? m.kickoff.toDate().toLocaleString() : ""}`;
+  const isVoting = currentWeek.status === "voting";
+  const isPredicting = currentWeek.status === "predicting";
 
-    const inputHome = document.createElement("input");
-    inputHome.type = "number";
-    inputHome.min = 0;
-    inputHome.placeholder = "Home goals";
+  // Sort matches by kickoff for nicer display
+  const sorted = [...matches].sort((a, b) => {
+    const ta = a.kickoff.toDate ? a.kickoff.toDate().getTime() : 0;
+    const tb = b.kickoff.toDate ? b.kickoff.toDate().getTime() : 0;
+    return ta - tb;
+  });
 
-    const inputAway = document.createElement("input");
-    inputAway.type = "number";
-    inputAway.min = 0;
-    inputAway.placeholder = "Away goals";
+  if (isVoting) {
+    // Show ALL matches with vote buttons
+    sorted.forEach(m => {
+      const li = document.createElement("li");
+      const label = document.createElement("div");
+      const votes = m.votes || {};
+      const yesVotes = Object.values(votes).filter(v => v === true).length;
+      const noVotes = Object.values(votes).filter(v => v === false).length;
 
-    const powerUpCheck = document.createElement("input");
-    powerUpCheck.type = "checkbox";
-    const powerUpLabel = document.createElement("label");
-    powerUpLabel.textContent = " Use double points";
-    powerUpLabel.prepend(powerUpCheck);
+      label.innerHTML = `
+        <strong>${m.homeTeam} vs ${m.awayTeam}</strong><br/>
+        Kickoff: ${m.kickoff.toDate ? m.kickoff.toDate().toLocaleString() : ""}<br/>
+        Current votes: ✅ ${yesVotes} | ❌ ${noVotes}
+      `;
 
-    const voteYesBtn = document.createElement("button");
-    voteYesBtn.textContent = "Vote include";
-    voteYesBtn.addEventListener("click", () => toggleVote(m.id, true));
+      const voteYesBtn = document.createElement("button");
+      voteYesBtn.textContent = "Vote include";
+      voteYesBtn.addEventListener("click", () => toggleVote(m.id, true));
 
-    const voteNoBtn = document.createElement("button");
-    voteNoBtn.textContent = "Vote skip";
-    voteNoBtn.addEventListener("click", () => toggleVote(m.id, false));
+      const voteNoBtn = document.createElement("button");
+      voteNoBtn.textContent = "Vote skip";
+      voteNoBtn.addEventListener("click", () => toggleVote(m.id, false));
 
-    const btn = document.createElement("button");
-    btn.textContent = "Save prediction";
-
-    btn.addEventListener("click", () => {
-      const hg = parseInt(inputHome.value, 10);
-      const ag = parseInt(inputAway.value, 10);
-      if (Number.isNaN(hg) || Number.isNaN(ag)) {
-        alert("Enter valid numbers");
-        return;
-      }
-      savePrediction(m, hg, ag, powerUpCheck.checked);
+      li.appendChild(label);
+      li.appendChild(voteYesBtn);
+      li.appendChild(voteNoBtn);
+      ul.appendChild(li);
     });
 
-    li.appendChild(label);
-    li.appendChild(inputHome);
-    li.appendChild(inputAway);
-    li.appendChild(powerUpLabel);
-    li.appendChild(btn);
-    li.appendChild(document.createElement("br"));
-    li.appendChild(voteYesBtn);
-    li.appendChild(voteNoBtn);
+    return; // no predictions yet during voting
+  }
 
-    ul.appendChild(li);
-  });
+  if (isPredicting) {
+    // Show ONLY included matches with prediction inputs
+    sorted
+      .filter(m => m.selected)
+      .forEach(m => {
+        const li = document.createElement("li");
+        const label = document.createElement("div");
+        label.innerHTML = `
+          <strong>${m.homeTeam} vs ${m.awayTeam}</strong><br/>
+          Kickoff: ${m.kickoff.toDate ? m.kickoff.toDate().toLocaleString() : ""}
+        `;
+
+        const inputHome = document.createElement("input");
+        inputHome.type = "number";
+        inputHome.min = 0;
+        inputHome.placeholder = "Home goals";
+
+        const inputAway = document.createElement("input");
+        inputAway.type = "number";
+        inputAway.min = 0;
+        inputAway.placeholder = "Away goals";
+
+        const powerUpCheck = document.createElement("input");
+        powerUpCheck.type = "checkbox";
+        const powerUpLabel = document.createElement("label");
+        powerUpLabel.textContent = " Use double points";
+        powerUpLabel.prepend(powerUpCheck);
+
+        const btn = document.createElement("button");
+        btn.textContent = "Save prediction";
+        btn.addEventListener("click", () => {
+          const hg = parseInt(inputHome.value, 10);
+          const ag = parseInt(inputAway.value, 10);
+          if (Number.isNaN(hg) || Number.isNaN(ag)) {
+            alert("Enter valid numbers");
+            return;
+          }
+          savePrediction(m, hg, ag, powerUpCheck.checked);
+        });
+
+        li.appendChild(label);
+        li.appendChild(inputHome);
+        li.appendChild(inputAway);
+        li.appendChild(powerUpLabel);
+        li.appendChild(btn);
+        ul.appendChild(li);
+      });
+  }
 }
+
 
 function renderLeaderboard(rows) {
   const tbody = qs("#leaderboard-body");
@@ -537,4 +584,5 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateScoresForWeek();
   });
 });
+
 
