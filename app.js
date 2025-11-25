@@ -169,6 +169,12 @@ async function toggleVote(matchId, voteYes) {
 
   loadMatchesForCurrentWeek();
 }
+async function setMatchSelected(matchId, selected) {
+  if (!currentWeek) return;
+  await db.collection("matches").doc(matchId).update({ selected });
+  // reload lists so UI updates
+  loadMatchesForCurrentWeek();
+}
 
 // 6. Predictions
 async function savePrediction(match, homeGoals, awayGoals, usePowerUp) {
@@ -531,3 +537,4 @@ document.addEventListener("DOMContentLoaded", () => {
     calculateScoresForWeek();
   });
 });
+
